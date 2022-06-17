@@ -31,19 +31,9 @@ double calculate_accuracy(string prediction_address, double threshold)
     for(int i=0; i<int(Y.size()); i++)
     {
         if(Y[i]==1 && Y_hat[i] - threshold >= -1e-9)
-        {
-//            if(true) {
-//                cout << Y[i] << " " << Y_hat[i] << endl;
-//            }
             n_correct_prediction++;
-        }
         if(Y[i]==0 && Y_hat[i] - threshold < -1e-9)
-        {
-//            if(true) {
-//                cout << Y[i] << " " << Y_hat[i] << endl;
-//            }
             n_correct_prediction++;
-        }
     }
     double accuracy = (double)(n_correct_prediction) / Y.size();
     return accuracy;

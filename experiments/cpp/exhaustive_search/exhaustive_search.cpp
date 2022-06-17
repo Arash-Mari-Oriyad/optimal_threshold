@@ -17,19 +17,9 @@ long double calculate_accuracy(vector<long double> Y, vector<long double> Y_hat,
     for(int i=0; i<Y.size(); i++)
     {
         if(Y[i]==1 && Y_hat[i] - threshold >= -1e-9)
-        {
-//            if(threshold==0.6) {
-//                cout << Y[i] << " " << Y_hat[i] << endl;
-//            }
             n_correct_prediction++;
-        }
         if(Y[i]==0 && Y_hat[i] - threshold < -1e-9)
-        {
-//            if(threshold==0.6) {
-//                cout << Y[i] << " " << Y_hat[i] << endl;
-//            }
             n_correct_prediction++;
-        }
     }
     long double accuracy = (long double)(n_correct_prediction) / Y.size();
     return accuracy;
@@ -66,7 +56,6 @@ vector<long double> exhaustive_search(string prediction_address)
             optimal_accuracy = accuracy;
             optimal_threshold = threshold;
         }
-//        cout << threshold << ' ' << accuracy << ' ' << optimal_threshold << ' ' << optimal_accuracy << endl;
     }
     vector<long double> optimal_threshold_accuracy;
     optimal_threshold_accuracy.push_back(optimal_threshold);
@@ -81,7 +70,7 @@ int main()
         PREDICTION_FILE_ADDRESSES.push_back(BASE_PREDICTION_ADDRESS + "predictions_" + to_string(i+1) + ".csv");
     double elapsed_time = 0;
     ofstream report_file(EXHAUSTIVE_SEARCH_REPORT_FILE_ADDRESS);
-//    ofstream es_report("es_t_a_report.txt");
+    ofstream es_report("es_t_a_report.txt");
     for(int i=0; i<N_EXPERIMENTS; i++)
     {
         cout << "Experiment " << to_string(i+1) << endl;
@@ -89,11 +78,10 @@ int main()
         vector<long double> optimal_threshold_accuracy = exhaustive_search(PREDICTION_FILE_ADDRESSES[i]);
         clock_t end = clock();
         elapsed_time += double(end - begin) / CLOCKS_PER_SEC;
-//        es_report << to_string(optimal_threshold_accuracy[0]) << " " << to_string(optimal_threshold_accuracy[1]) << endl;
+        es_report << to_string(optimal_threshold_accuracy[0]) << " " << to_string(optimal_threshold_accuracy[1]) << endl;
         cout << to_string(optimal_threshold_accuracy[0]) << " " << to_string(optimal_threshold_accuracy[1]) << endl;
     }
     report_file << "average_execution_time=" << to_string((double(elapsed_time) / N_EXPERIMENTS)) << endl;
     report_file << "number_of_experiments=" << to_string(N_EXPERIMENTS) << endl;
-//    cout << "Elapsed Time = " << elapsed_time << endl;
     return 0;
 }

@@ -11,7 +11,6 @@ def generate_predictions():
         real_values = np.random.randint(2, size=configurations.N_INSTANCES)
         predicted_values = np.zeros(configurations.N_INSTANCES)
         random_numbers = np.round(np.random.rand(configurations.N_INSTANCES), decimals=2)
-        print(random_numbers)
         for index, real_value in enumerate(real_values):
             if real_value == 1:
                 if random_numbers[index] < 0.33:

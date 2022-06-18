@@ -1,0 +1,7 @@
+N_EXPERIMENTS = 100
+N_INSTANCES = 1000
+PREDICTION_DECIMAL = 3
+
+BASE_PREDICTION_ADDRESS = 'predictions/'
+PREDICTION_FILE_ADDRESSES = [BASE_PREDICTION_ADDRESS + f'predictions_{i+1}.csv'
+                             for i in range(N_EXPERIMENTS)]

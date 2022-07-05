@@ -18,7 +18,7 @@ vector<long double> improved_exhaustive_search(string prediction_address)
     ifstream prediction_file(prediction_address);
     string line;
     long double real, predicted;
-    vector<long double> thresholds;
+    set<long double> thresholds;
     map<pair<int, long double>, int> Y_Y_hat_map;
     pair<int, long double> temp_pair;
     getline(prediction_file, line);
@@ -32,19 +32,15 @@ vector<long double> improved_exhaustive_search(string prediction_address)
         temp_pair.first = real;
         temp_pair.second = predicted;
         Y_Y_hat_map[temp_pair]++;
-        if (std::find(thresholds.begin(), thresholds.end(), predicted)==thresholds.end())
-            thresholds.push_back(predicted);
+        thresholds.insert(predicted);
     }
-    if (std::find(thresholds.begin(), thresholds.end(), 0)==thresholds.end())
-        thresholds.push_back(0);
-    if (std::find(thresholds.begin(), thresholds.end(), 1)==thresholds.end())
-        thresholds.push_back(1);
-    sort(thresholds.begin(), thresholds.end());
-    vector<long double> reversed_thresholds (thresholds.rbegin(), thresholds.rend());
-    for(auto threshold: thresholds)
+    thresholds.insert(0);
+    thresholds.insert(1);
+    set<long double>::iterator set_it;
+    for (set_it = thresholds.begin(); set_it != thresholds.end(); set_it++)
     {
         temp_pair.first = 1;
-        temp_pair.second = threshold;
+        temp_pair.second = *set_it;
         if(Y_Y_hat_map.find(temp_pair) == Y_Y_hat_map.end())
             Y_Y_hat_map[temp_pair] = 0;
         temp_pair.first = 0;
@@ -53,26 +49,27 @@ vector<long double> improved_exhaustive_search(string prediction_address)
     }
     int sum = 0, temp = 0;
     temp_pair.first = 0;
-    for(auto threshold: thresholds)
+    for(set_it = thresholds.begin(); set_it != thresholds.end(); set_it++)
     {
-        temp_pair.second = threshold;
+        temp_pair.second = *set_it;
         temp = Y_Y_hat_map[temp_pair];
         Y_Y_hat_map[temp_pair] = sum;
         sum += temp;
     }
     temp_pair.first = 1;
     sum = 0;
-    for(auto threshold: reversed_thresholds)
+    set<long double>::reverse_iterator reversed_set_it;
+    for(reversed_set_it = thresholds.rbegin(); reversed_set_it != thresholds.rend(); reversed_set_it++)
     {
-        temp_pair.second = threshold;
+        temp_pair.second = *reversed_set_it;
         sum += Y_Y_hat_map[temp_pair];
         Y_Y_hat_map[temp_pair] = sum;
     }
     long double optimal_accuracy = -1, temp_accuracy, optimal_threshold;
-    for(auto threshold : thresholds)
+    for(set_it = thresholds.begin(); set_it != thresholds.end(); set_it++)
     {
         temp_accuracy = 0;
-        temp_pair.second = threshold;
+        temp_pair.second = *set_it;
         temp_pair.first = 1;
         temp_accuracy += Y_Y_hat_map[temp_pair];
         temp_pair.first = 0;
@@ -80,7 +77,7 @@ vector<long double> improved_exhaustive_search(string prediction_address)
         if(temp_accuracy > optimal_accuracy)
         {
             optimal_accuracy = temp_accuracy;
-            optimal_threshold = threshold;
+            optimal_threshold = *set_it;
         }
     }
     vector<long double> optimal_threshold_accuracy;

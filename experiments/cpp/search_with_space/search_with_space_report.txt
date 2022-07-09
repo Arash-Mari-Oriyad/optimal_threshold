@@ -1,2 +1,2 @@
-average_execution_time=0.000276
-number_of_experiments=1
+average_execution_time=0.046778
+number_of_experiments=2

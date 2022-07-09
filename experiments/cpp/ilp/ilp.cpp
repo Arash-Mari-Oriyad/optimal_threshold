@@ -43,7 +43,6 @@ double calculate_accuracy(string prediction_address, double threshold)
 double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetitions)
 {
     int n_variables = int(Y.size());
-
     glp_prob *ilp = glp_create_prob();
     glp_set_prob_name(ilp, "ilp_problem");
     glp_set_obj_dir(ilp, GLP_MIN);
@@ -61,7 +60,7 @@ double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetition
     for(int i = 0; i < n_variables; i++)
     {
         glp_set_row_name(ilp, i+1+2*n_variables, ("yt_c_1_" + to_string(i+1)).c_str());
-        glp_set_row_bnds(ilp, i+1+2*n_variables, GLP_LO, Y_hat[i] + 1e-6, 0);
+        glp_set_row_bnds(ilp, i+1+2*n_variables, GLP_LO, Y_hat[i] + 1e-3, 0);
     }
     for(int i = 0; i < n_variables; i++)
     {
@@ -136,9 +135,9 @@ int main()
 {
     for(int i=0; i<N_EXPERIMENTS; i++)
         PREDICTION_FILE_ADDRESSES.push_back(BASE_PREDICTION_ADDRESS + "predictions_" + to_string(i+1) + ".csv");
+    ofstream time_report_file(BASE_RESULTS_ADDRESS + to_string(N_INSTANCES) + "_" + to_string(PREDICTION_DECIMAL) + "/" + TIME_REPORT_FILE_ADDRESS);
+    ofstream prediction_report_file(BASE_RESULTS_ADDRESS + to_string(N_INSTANCES) + "_" + to_string(PREDICTION_DECIMAL) + "/" + PREDICTION_REPORT_FILE_ADDRESS);
     double elapsed_time = 0;
-    ofstream report_file(ILP_REPORT_FILE_ADDRESS);
-//    ofstream ilp_report("ilp_t_a_report.txt");
     for(int i=0; i<N_EXPERIMENTS; i++)
     {
         cout << "Experiment " << to_string(i+1) << endl;
@@ -173,10 +172,10 @@ int main()
             optimal_threshold = 0;
         clock_t end = clock();
         elapsed_time += double(end - begin) / CLOCKS_PER_SEC;
-        cout << to_string(optimal_threshold) << " " <<
-                   to_string(calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold)) << endl;
+        cout << optimal_threshold << " " << calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold) << endl;
+        prediction_report_file << optimal_threshold << " " << calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold) << endl;
     }
-    report_file << "average_execution_time=" << to_string((double(elapsed_time) / N_EXPERIMENTS)) << endl;
-    report_file << "number_of_experiments=" << to_string(N_EXPERIMENTS) << endl;
+    time_report_file << "average_execution_time=" << to_string((double(elapsed_time) / N_EXPERIMENTS)) << endl;
+    time_report_file << "number_of_experiments=" << to_string(N_EXPERIMENTS) << endl;
     return 0;
 }

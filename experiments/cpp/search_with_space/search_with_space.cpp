@@ -19,8 +19,8 @@ vector<long double> search_with_space(string prediction_address)
     ifstream prediction_file(prediction_address);
     string line;
     long double real, predicted;
-    int Y_hat_counter_0[10000];
-    int Y_hat_counter_1[10000];
+    int Y_hat_counter_0[10000] = {0};
+    int Y_hat_counter_1[10000] = {0};
     getline(prediction_file, line);
     while(getline(prediction_file, line))
     {
@@ -57,6 +57,7 @@ vector<long double> search_with_space(string prediction_address)
             optimal_threshold = i;
         }
     }
+
     vector<long double> optimal_threshold_accuracy;
     optimal_threshold_accuracy.push_back((long double)(optimal_threshold)/size);
     optimal_threshold_accuracy.push_back((long double)(optimal_accuracy)/n);

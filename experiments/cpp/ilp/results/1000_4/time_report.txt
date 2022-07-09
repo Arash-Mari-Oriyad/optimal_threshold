@@ -1,2 +1,0 @@
-average_execution_time=2.212256
-number_of_experiments=50

@@ -18,7 +18,6 @@ long double calculate_accuracy(vector<double> Y, vector<double> Y_hat, double th
             n_correct_prediction++;
     }
     long double accuracy = (long double)(n_correct_prediction) / Y.size();
-    cout << n_correct_prediction << " " << accuracy << endl;
     return accuracy;
 }
 

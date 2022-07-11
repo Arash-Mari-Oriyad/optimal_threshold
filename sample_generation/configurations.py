@@ -1,7 +1,3 @@
-N_EXPERIMENTS = 5
-N_INSTANCES = 20000000
-PREDICTION_DECIMAL = 1
-
-BASE_PREDICTION_ADDRESS = 'predictions/'
-PREDICTION_FILE_ADDRESSES = [BASE_PREDICTION_ADDRESS + f'predictions_{i+1}.csv'
-                             for i in range(N_EXPERIMENTS)]
+N_SAMPLES = 100
+N_INSTANCES_LIST = [1000 * i for i in range(1, 2)]
+PREDICTION_DECIMALS = [1, 2, 3, 4, 5]

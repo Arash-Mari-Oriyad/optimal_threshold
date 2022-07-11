@@ -1,15 +1,13 @@
 #include <iostream>
-#include <bits/stdc++.h>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <set>
-#include <ctime>
+#include <map>
 #include <glpk.h>
-#include "configurations.h"
 
 using namespace std;
+
 
 double calculate_accuracy(string prediction_address, double threshold)
 {
@@ -27,15 +25,15 @@ double calculate_accuracy(string prediction_address, double threshold)
         Y.push_back(real);
         Y_hat.push_back(predicted);
     }
-    int n_correct_prediction = 0;
+    int n_correct_predictions = 0;
     for(int i=0; i<int(Y.size()); i++)
     {
         if(Y[i]==1 && Y_hat[i] - threshold >= -1e-9)
-            n_correct_prediction++;
+            n_correct_predictions++;
         if(Y[i]==0 && Y_hat[i] - threshold < -1e-9)
-            n_correct_prediction++;
+            n_correct_predictions++;
     }
-    double accuracy = (double)(n_correct_prediction) / Y.size();
+    double accuracy = (double)(n_correct_predictions) / Y.size();
     return accuracy;
 }
 
@@ -60,7 +58,7 @@ double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetition
     for(int i = 0; i < n_variables; i++)
     {
         glp_set_row_name(ilp, i+1+2*n_variables, ("yt_c_1_" + to_string(i+1)).c_str());
-        glp_set_row_bnds(ilp, i+1+2*n_variables, GLP_LO, Y_hat[i] + 1e-3, 0);
+        glp_set_row_bnds(ilp, i+1+2*n_variables, GLP_LO, Y_hat[i] + 1e-4, 0);
     }
     for(int i = 0; i < n_variables; i++)
     {
@@ -87,7 +85,6 @@ double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetition
     glp_set_col_bnds(ilp, 2*n_variables+1, GLP_DB, 0, 1);
     glp_set_obj_coef(ilp, 2*n_variables+1, 0);
     glp_set_col_kind(ilp, 2*n_variables+1, GLP_CV);
-
     int ia[8*n_variables+1], ja[8*n_variables+1];
     double ar[8*n_variables+1];
     int counter = 1;
@@ -120,7 +117,6 @@ double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetition
         counter++;
     }
     glp_load_matrix(ilp, 8*n_variables, ia, ja, ar);
-
     glp_iocp parm;
     glp_init_iocp(&parm);
     parm.presolve = GLP_ON;
@@ -131,18 +127,23 @@ double optimize(vector<double> Y, vector<double> Y_hat, vector<int> n_repetition
 }
 
 
-int main()
+int main(int argc, char **argv)
 {
-    for(int i=0; i<N_EXPERIMENTS; i++)
-        PREDICTION_FILE_ADDRESSES.push_back(BASE_PREDICTION_ADDRESS + "predictions_" + to_string(i+1) + ".csv");
-    ofstream time_report_file(BASE_RESULTS_ADDRESS + to_string(N_INSTANCES) + "_" + to_string(PREDICTION_DECIMAL) + "/" + TIME_REPORT_FILE_ADDRESS);
-    ofstream prediction_report_file(BASE_RESULTS_ADDRESS + to_string(N_INSTANCES) + "_" + to_string(PREDICTION_DECIMAL) + "/" + PREDICTION_REPORT_FILE_ADDRESS);
+    string samples_base_address = argv[1];
+    int n_samples = atoi(argv[2]);
+    int n_instances = atoi(argv[3]);
+    int prediction_decimal = atoi(argv[4]);
+    vector<string> samples_addresses;
+    for(int i=0; i<n_samples; i++)
+        samples_addresses.push_back(samples_base_address + "/sample_" + to_string(i+1) + ".csv");
+    ofstream time_report_file("results/" + to_string(n_instances) + "_" + to_string(prediction_decimal) + "/time_report.txt");
+    ofstream threshold_accuracy_report_file("results/" + to_string(n_instances) + "_" + to_string(prediction_decimal) + "/threshold_accuracy_report.txt");
     double elapsed_time = 0;
-    for(int i=0; i<N_EXPERIMENTS; i++)
+    for(int i=0; i<n_samples; i++)
     {
-        cout << "Experiment " << to_string(i+1) << endl;
+        cout << "Sample " << to_string(i+1) << endl;
         clock_t begin = clock();
-        ifstream prediction_file(PREDICTION_FILE_ADDRESSES[i]);
+        ifstream prediction_file(samples_addresses[i]);
         string line;
         double real, predicted;
         map<pair<double, double>, int> Y_Y_hat_map;
@@ -168,14 +169,14 @@ int main()
             n_repetitions.push_back(it->second);
         }
         double optimal_threshold = optimize(Y, Y_hat, n_repetitions);
-        if(calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold) < calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], 0))
+        if(calculate_accuracy(samples_addresses[i], optimal_threshold) < calculate_accuracy(samples_addresses[i], 0))
             optimal_threshold = 0;
         clock_t end = clock();
         elapsed_time += double(end - begin) / CLOCKS_PER_SEC;
-        cout << optimal_threshold << " " << calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold) << endl;
-        prediction_report_file << optimal_threshold << " " << calculate_accuracy(PREDICTION_FILE_ADDRESSES[i], optimal_threshold) << endl;
+        cout << optimal_threshold << " " << calculate_accuracy(samples_addresses[i], optimal_threshold) << endl;
+        threshold_accuracy_report_file << optimal_threshold << " " << calculate_accuracy(samples_addresses[i], optimal_threshold) << endl;
     }
-    time_report_file << "average_execution_time=" << to_string((double(elapsed_time) / N_EXPERIMENTS)) << endl;
-    time_report_file << "number_of_experiments=" << to_string(N_EXPERIMENTS) << endl;
+    time_report_file << "average_execution_time = " << to_string((double(elapsed_time) / n_samples)) << endl;
+    time_report_file << "number_of_samples = " << to_string(n_samples) << endl;
     return 0;
 }

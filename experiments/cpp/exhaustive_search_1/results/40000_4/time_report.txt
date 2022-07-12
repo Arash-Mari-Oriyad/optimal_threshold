@@ -1,0 +1,2 @@
+average_execution_time = 41.569297
+number_of_samples = 50

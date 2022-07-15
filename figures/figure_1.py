@@ -1,18 +1,53 @@
+import numpy as np
 import matplotlib.pyplot as plt
 
-x_ticks = ['1', '2', '5', '10', '20', '50', '100', '200', '500', '1000', '2000']
-ilp_time = [0.007, 0.010, 0.023, 0.043, 0.086, 0.212, 0.429, 0.866, 2.108, 4.131, 8.198]
-exhaustive_search_time = [0.002, 0.004, 0.010, 0.021, 0.042, 0.115, 0.218, 0.439, 1.102, 2.229, 4.703]
-x = [i for i in range(len(x_ticks))]
 
-plt.plot(x, ilp_time, '--bo', label='ILP')
-plt.plot(x, exhaustive_search_time, '--go', label='Search')
+TIME_REPORT_BASE_ADDRESS = "../experiments/cpp"
 
-plt.title("Prediction Decimal = 1")
-plt.ylabel("Execution Time (s)", size=10)
+x_ticks = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50"]
+
+ilp_average_time_2 = []
+for n_instances in x_ticks:
+    time_report_address = f"{TIME_REPORT_BASE_ADDRESS}/ilp/results/" \
+                          f"{int(n_instances) * 1000}_{2}/time_report.txt"
+    with open(time_report_address, "r") as time_report_file:
+        line = time_report_file.readline()
+    ilp_average_time_2.append(round(float(line.split()[-1]), 3))
+
+ilp_average_time_3 = []
+for n_instances in x_ticks:
+    time_report_address = f"{TIME_REPORT_BASE_ADDRESS}/ilp/results/" \
+                          f"{int(n_instances) * 1000}_{3}/time_report.txt"
+    with open(time_report_address, "r") as time_report_file:
+        line = time_report_file.readline()
+    ilp_average_time_3.append(round(float(line.split()[-1]), 3))
+
+exhaustive_search_average_time_2 = []
+for n_instances in x_ticks:
+    time_report_address = f"{TIME_REPORT_BASE_ADDRESS}/exhaustive_search/results/" \
+                          f"{int(n_instances) * 1000}_{2}/time_report.txt"
+    with open(time_report_address, "r") as time_report_file:
+        line = time_report_file.readline()
+    exhaustive_search_average_time_2.append(round(float(line.split()[-1]), 3))
+
+exhaustive_search_average_time_3 = []
+for n_instances in x_ticks:
+    time_report_address = f"{TIME_REPORT_BASE_ADDRESS}/exhaustive_search/results/" \
+                          f"{int(n_instances) * 1000}_{3}/time_report.txt"
+    with open(time_report_address, "r") as time_report_file:
+        line = time_report_file.readline()
+    exhaustive_search_average_time_3.append(round(float(line.split()[-1]), 3))
+
+portion_2 = np.log10([exhaustive_search_average_time_2[i] / ilp_average_time_2[i] for i in range(len(x_ticks))])
+portion_3 = np.log10([exhaustive_search_average_time_3[i] / ilp_average_time_3[i] for i in range(len(x_ticks))])
+
+plt.plot(x_ticks, portion_2, "--ro", label="Prediction Decimal = 2")
+plt.plot(x_ticks, portion_3, "--bo", label="Prediction Decimal = 3")
+
+plt.title("")
+plt.ylabel("Log (Search / ILP)", size=10)
 plt.xlabel("#Instances * 1000", size=10)
-plt.xticks(x, x_ticks)
-# plt.xlim((0, 13))
-# plt.ylim((69, 74))
 plt.legend()
-plt.savefig('figure_1.png', format='png')
+plt.grid()
+plt.savefig("figure_1.png", format="png")
+plt.savefig("figure_1.svg", format="svg")
